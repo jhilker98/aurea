@@ -1,3 +1,60 @@
+* General World Info
+** Tech Level: Iron Age/Bronze Age/ Avatar pre-human-invasion
+
+
 * Races
 
-* Cultures
+** Humans
+
+** Sevir 
+*** Appearance
+**** Skin Tone: generally blue, but different climates can change the hue - average is a royal blue
+**** Climate Type: [1d3] -> = 2 - Generally Temperate, but can live in colder and warmer environments as well
+***** Ethnic Type: [1d12] -> = 4 - Native North American, with some North African influences as well
+**** Eye Color:
+**** Hair Color:
+**** Hair Type:
+**** Nose Type: 
+**** Lip Size:
+**** Eye Type: 
+**** Relative Size: 
+**** Pilosity:
+**** Significant Animals: N/A
+
+*** Seviri Culture 
+
+** Eiliz
+*** Appearance
+**** Skin Tone: 
+**** Climate Type: 
+***** Ethnic Type: 
+**** Eye Color:
+**** Hair Color:
+**** Hair Type:
+**** Nose Type: 
+**** Lip Size:
+**** Eye Type: 
+**** Relative Size: 
+**** Pilosity:
+**** Significant Animals: N/A
+
+*** Eilizi Culture
+
+** Kritu
+*** Appearance
+**** Skin Tone: 
+**** Climate Type:
+***** Ethnic Type: 
+**** Eye Color:
+**** Hair Color:
+**** Hair Type:
+**** Nose Type: 
+**** Lip Size:
+**** Eye Type: 
+**** Relative Size: 
+**** Pilosity:
+**** Significant Animals: N/A
+
+*** Kritur Culture
+
+
