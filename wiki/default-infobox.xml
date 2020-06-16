@@ -1,0 +1,2255 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="en">
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <dbname>enwiki</dbname>
+    <base>https://en.wikipedia.org/wiki/Main_Page</base>
+    <generator>MediaWiki 1.35.0-wmf.26</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal talk</namespace>
+      <namespace key="108" case="first-letter">Book</namespace>
+      <namespace key="109" case="first-letter">Book talk</namespace>
+      <namespace key="118" case="first-letter">Draft</namespace>
+      <namespace key="119" case="first-letter">Draft talk</namespace>
+      <namespace key="446" case="first-letter">Education Program</namespace>
+      <namespace key="447" case="first-letter">Education Program talk</namespace>
+      <namespace key="710" case="first-letter">TimedText</namespace>
+      <namespace key="711" case="first-letter">TimedText talk</namespace>
+      <namespace key="828" case="first-letter">Module</namespace>
+      <namespace key="829" case="first-letter">Module talk</namespace>
+      <namespace key="2300" case="first-letter">Gadget</namespace>
+      <namespace key="2301" case="first-letter">Gadget talk</namespace>
+      <namespace key="2302" case="case-sensitive">Gadget definition</namespace>
+      <namespace key="2303" case="case-sensitive">Gadget definition talk</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Template:Infobox</title>
+    <ns>10</ns>
+    <id>891845</id>
+    <revision>
+      <id>855069164</id>
+      <parentid>855063393</parentid>
+      <timestamp>2018-08-15T18:33:36Z</timestamp>
+      <contributor>
+        <username>Primefac</username>
+        <id>11508456</id>
+      </contributor>
+      <comment>Undid revision 855063393 by [[Special:Contributions/Jdlrobson|Jdlrobson]] ([[User talk:Jdlrobson|talk]]) rather problematic change mentioned [[Template_talk:Infobox#Using_template_styles_to_reduce_technical_debt_inside_mobile_skin|on talk page]], reverting until it can be sorted</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="340" xml:space="preserve">{{#invoke:Infobox|infobox}}&lt;includeonly&gt;{{template other|{{#ifeq:{{PAGENAME}}|Infobox||{{#ifeq:{{str left|{{SUBPAGENAME}}|7}}|Infobox|[[Category:Infobox templates|{{remove first word|{{SUBPAGENAME}}}}]]}}}}|}}&lt;/includeonly&gt;&lt;noinclude&gt;
+{{documentation}}
+&lt;!-- Categories go in the /doc subpage, and interwikis go in Wikidata. --&gt;
+&lt;/noinclude&gt;</text>
+      <sha1>f4hgwrnr11ahhwyo266vcd10dpi92pe</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Module:Infobox</title>
+    <ns>828</ns>
+    <id>38808424</id>
+    <revision>
+      <id>906075621</id>
+      <parentid>906073835</parentid>
+      <timestamp>2019-07-13T13:05:36Z</timestamp>
+      <contributor>
+        <username>Gonnym</username>
+        <id>14984434</id>
+      </contributor>
+      <comment>Undid revision 906073835 by [[Special:Contributions/Gonnym|Gonnym]] ([[User talk:Gonnym|talk]]) errors in code were reported</comment>
+      <model>Scribunto</model>
+      <format>text/plain</format>
+      <text bytes="15874" xml:space="preserve">--
+-- This module implements {{Infobox}}
+--
+
+local p = {}
+
+local navbar = require('Module:Navbar')._navbar
+
+local args = {}
+local origArgs
+local root
+
+local function notempty( s ) return s and s:match( '%S' ) end
+
+local function fixChildBoxes(sval, tt)
+	if notempty(sval) then
+		local marker = '&lt;span class=special_infobox_marker&gt;'
+		local s = sval
+		s = mw.ustring.gsub(s, '(&lt;%s*[Tt][Rr])', marker .. '%1')
+		s = mw.ustring.gsub(s, '(&lt;/[Tt][Rr]%s*&gt;)', '%1' .. marker)
+		if s:match(marker) then
+			s = mw.ustring.gsub(s, marker .. '%s*' .. marker, '')
+			s = mw.ustring.gsub(s, '([\r\n]|-[^\r\n]*[\r\n])%s*' .. marker, '%1')
+			s = mw.ustring.gsub(s, marker .. '%s*([\r\n]|-)', '%1')
+			s = mw.ustring.gsub(s, '(&lt;/[Cc][Aa][Pp][Tt][Ii][Oo][Nn]%s*&gt;%s*)' .. marker, '%1')
+			s = mw.ustring.gsub(s, '(&lt;%s*[Tt][Aa][Bb][Ll][Ee][^&lt;&gt;]*&gt;%s*)' .. marker, '%1')
+			s = mw.ustring.gsub(s, '^(%{|[^\r\n]*[\r\n]%s*)' .. marker, '%1')
+			s = mw.ustring.gsub(s, '([\r\n]%{|[^\r\n]*[\r\n]%s*)' .. marker, '%1')
+			s = mw.ustring.gsub(s,  marker .. '(%s*&lt;/[Tt][Aa][Bb][Ll][Ee]%s*&gt;)', '%1')
+			s = mw.ustring.gsub(s,  marker .. '(%s*\n|%})', '%1')
+		end
+		if s:match(marker) then
+			local subcells = mw.text.split(s, marker)
+			s = ''
+			for k = 1, #subcells do
+				if k == 1 then
+					s = s .. subcells[k] .. '&lt;/' .. tt .. '&gt;&lt;/tr&gt;'
+				elseif k == #subcells then
+					local rowstyle = ' style="display:none"'
+					if notempty(subcells[k]) then rowstyle = ''	end
+					s = s .. '&lt;tr' .. rowstyle ..'&gt;&lt;' .. tt .. ' colspan=2&gt;\n' .. subcells[k]
+				elseif notempty(subcells[k]) then
+					if (k % 2) == 0 then
+						s = s .. subcells[k]
+					else
+						s = s .. '&lt;tr&gt;&lt;' .. tt .. ' colspan=2&gt;\n' .. subcells[k] .. '&lt;/' .. tt .. '&gt;&lt;/tr&gt;'
+					end
+				end
+			end
+		end
+		-- the next two lines add a newline at the end of lists for the PHP parser
+		-- https://en.wikipedia.org/w/index.php?title=Template_talk:Infobox_musical_artist&amp;oldid=849054481
+		-- remove when [[:phab:T191516]] is fixed or OBE
+		s = mw.ustring.gsub(s, '([\r\n][%*#;:][^\r\n]*)$', '%1\n')
+		s = mw.ustring.gsub(s, '^([%*#;:][^\r\n]*)$', '%1\n')
+		s = mw.ustring.gsub(s, '^([%*#;:])', '\n%1')
+		s = mw.ustring.gsub(s, '^(%{%|)', '\n%1')
+		return s
+	else
+		return sval
+	end
+end
+
+local function union(t1, t2)
+    -- Returns the union of the values of two tables, as a sequence.
+    local vals = {}
+    for k, v in pairs(t1) do
+        vals[v] = true
+    end
+    for k, v in pairs(t2) do
+        vals[v] = true
+    end
+    local ret = {}
+    for k, v in pairs(vals) do
+        table.insert(ret, k)
+    end
+    return ret
+end
+
+local function getArgNums(prefix)
+    -- Returns a table containing the numbers of the arguments that exist
+    -- for the specified prefix. For example, if the prefix was 'data', and
+    -- 'data1', 'data2', and 'data5' exist, it would return {1, 2, 5}.
+    local nums = {}
+    for k, v in pairs(args) do
+        local num = tostring(k):match('^' .. prefix .. '([1-9]%d*)$')
+        if num then table.insert(nums, tonumber(num)) end
+    end
+    table.sort(nums)
+    return nums
+end
+
+local function addRow(rowArgs)
+    -- Adds a row to the infobox, with either a header cell
+    -- or a label/data cell combination.
+    if rowArgs.header then
+        root
+            :tag('tr')
+                :addClass(rowArgs.rowclass)
+                :cssText(rowArgs.rowstyle)
+                :attr('id', rowArgs.rowid)
+                :tag('th')
+                    :attr('colspan', 2)
+                    :attr('id', rowArgs.headerid)
+                    :addClass(rowArgs.class)
+                    :addClass(args.headerclass)
+                    :css('text-align', 'center')
+                    :cssText(args.headerstyle)
+                    :cssText(rowArgs.rowcellstyle)
+                    :wikitext(fixChildBoxes(rowArgs.header, 'th'))
+    elseif rowArgs.data then
+        local row = root:tag('tr')
+        row:addClass(rowArgs.rowclass)
+        row:cssText(rowArgs.rowstyle)
+        row:attr('id', rowArgs.rowid)
+        if rowArgs.label then
+            row
+                :tag('th')
+                    :attr('scope', 'row')
+                    :attr('id', rowArgs.labelid)
+                    :cssText(args.labelstyle)
+                    :cssText(rowArgs.rowcellstyle)
+                    :wikitext(rowArgs.label)
+                    :done()
+        end
+        
+        local dataCell = row:tag('td')
+        if not rowArgs.label then 
+            dataCell
+                :attr('colspan', 2)
+                :css('text-align', 'center') 
+        end
+        dataCell
+            :attr('id', rowArgs.dataid)
+            :addClass(rowArgs.class)
+            :cssText(rowArgs.datastyle)
+            :cssText(rowArgs.rowcellstyle)
+            :wikitext(fixChildBoxes(rowArgs.data, 'td'))
+    end
+end
+
+local function renderTitle()
+    if not args.title then return end
+
+    root
+        :tag('caption')
+            :addClass(args.titleclass)
+            :cssText(args.titlestyle)
+            :wikitext(args.title)
+end
+
+local function renderAboveRow()
+    if not args.above then return end
+    
+    root
+        :tag('tr')
+            :tag('th')
+                :attr('colspan', 2)
+                :addClass(args.aboveclass)
+                :css('text-align', 'center')
+                :css('font-size', '125%')
+                :css('font-weight', 'bold')
+                :cssText(args.abovestyle)
+                :wikitext(fixChildBoxes(args.above,'th'))
+end
+
+local function renderBelowRow()
+    if not args.below then return end
+    
+    root
+        :tag('tr')
+            :tag('td')
+                :attr('colspan', '2')
+                :addClass(args.belowclass)
+                :css('text-align', 'center')
+                :cssText(args.belowstyle)
+                :wikitext(fixChildBoxes(args.below,'td'))
+end
+
+local function renderSubheaders()
+    if args.subheader then
+        args.subheader1 = args.subheader
+    end
+    if args.subheaderrowclass then
+        args.subheaderrowclass1 = args.subheaderrowclass
+    end
+    local subheadernums = getArgNums('subheader')
+    for k, num in ipairs(subheadernums) do
+        addRow({
+            data = args['subheader' .. tostring(num)],
+            datastyle = args.subheaderstyle,
+            rowcellstyle = args['subheaderstyle' .. tostring(num)],
+            class = args.subheaderclass,
+            rowclass = args['subheaderrowclass' .. tostring(num)]
+        })
+    end
+end
+
+local function renderImages()
+    if args.image then
+        args.image1 = args.image
+    end
+    if args.caption then
+        args.caption1 = args.caption
+    end
+    local imagenums = getArgNums('image')
+    for k, num in ipairs(imagenums) do
+        local caption = args['caption' .. tostring(num)]
+        local data = mw.html.create():wikitext(args['image' .. tostring(num)])
+        if caption then
+            data
+                :tag('div')
+                    :cssText(args.captionstyle)
+                    :wikitext(caption)
+        end
+        addRow({
+            data = tostring(data),
+            datastyle = args.imagestyle,
+            class = args.imageclass,
+            rowclass = args['imagerowclass' .. tostring(num)]
+        })
+    end
+end
+
+local function renderRows()
+    -- Gets the union of the header and data argument numbers,
+    -- and renders them all in order using addRow.
+    local rownums = union(getArgNums('header'), getArgNums('data'))
+    table.sort(rownums)
+    for k, num in ipairs(rownums) do
+        addRow({
+            header = args['header' .. tostring(num)],
+            label = args['label' .. tostring(num)],
+            data = args['data' .. tostring(num)],
+            datastyle = args.datastyle,
+            class = args['class' .. tostring(num)],
+            rowclass = args['rowclass' .. tostring(num)],
+            rowstyle = args['rowstyle' .. tostring(num)],
+            rowcellstyle = args['rowcellstyle' .. tostring(num)],
+            dataid = args['dataid' .. tostring(num)],
+            labelid = args['labelid' .. tostring(num)],
+            headerid = args['headerid' .. tostring(num)],
+            rowid = args['rowid' .. tostring(num)]
+        })
+    end
+end
+
+local function renderNavBar()
+    if not args.name then return end
+    
+    root
+        :tag('tr')
+            :tag('td')
+                :attr('colspan', '2')
+                :css('text-align', 'right')
+                :wikitext(navbar{
+                    args.name,
+                    mini = 1,
+                })
+end
+
+local function renderItalicTitle()
+    local italicTitle = args['italic title'] and mw.ustring.lower(args['italic title'])
+    if italicTitle == '' or italicTitle == 'force' or italicTitle == 'yes' then
+        root:wikitext(mw.getCurrentFrame():expandTemplate({title = 'italic title'}))
+    end
+end
+
+local function renderTrackingCategories()
+    if args.decat ~= 'yes' then
+    	if args.child == 'yes' then
+        	if args.title then
+            	root:wikitext('[[Category:Pages which use embedded infobox templates with the title parameter]]')
+        	end
+        elseif #(getArgNums('data')) == 0 and mw.title.getCurrentTitle().namespace == 0 then
+            root:wikitext('[[Category:Articles which use infobox templates with no data rows]]')
+        end
+    end
+end
+
+local function _infobox()
+    -- Specify the overall layout of the infobox, with special settings
+    -- if the infobox is used as a 'child' inside another infobox.
+    if args.child ~= 'yes' then
+        root = mw.html.create('table')
+        
+        root
+            :addClass((args.subbox ~= 'yes') and 'infobox' or nil)
+            :addClass(args.bodyclass)
+            
+            if args.subbox == 'yes' then
+                root
+                    :css('padding', '0')
+                    :css('border', 'none')
+                    :css('margin', '-3px')
+                    :css('width', 'auto')
+                    :css('min-width', '100%')
+                    :css('font-size', '100%')
+                    :css('clear', 'none')
+                    :css('float', 'none')
+                    :css('background-color', 'transparent')
+            else
+                root
+                    :css('width', '22em')
+            end
+        root
+            :cssText(args.bodystyle)
+    
+        renderTitle()
+        renderAboveRow()
+    else
+        root = mw.html.create()
+        
+        root
+            :wikitext(args.title)
+    end
+
+    renderSubheaders()
+    renderImages() 
+    renderRows() 
+    renderBelowRow()  
+    renderNavBar()
+    renderItalicTitle()
+    renderTrackingCategories()
+    
+    return tostring(root)
+end
+
+local function preprocessSingleArg(argName)
+    -- If the argument exists and isn't blank, add it to the argument table.
+    -- Blank arguments are treated as nil to match the behaviour of ParserFunctions.
+    if origArgs[argName] and origArgs[argName] ~= '' then
+        args[argName] = origArgs[argName]
+    end
+end
+
+local function preprocessArgs(prefixTable, step)
+    -- Assign the parameters with the given prefixes to the args table, in order, in batches
+    -- of the step size specified. This is to prevent references etc. from appearing in the
+    -- wrong order. The prefixTable should be an array containing tables, each of which has
+    -- two possible fields, a "prefix" string and a "depend" table. The function always parses
+    -- parameters containing the "prefix" string, but only parses parameters in the "depend"
+    -- table if the prefix parameter is present and non-blank.
+    if type(prefixTable) ~= 'table' then
+        error("Non-table value detected for the prefix table", 2)
+    end
+    if type(step) ~= 'number' then
+        error("Invalid step value detected", 2)
+    end
+    
+    -- Get arguments without a number suffix, and check for bad input.
+    for i,v in ipairs(prefixTable) do
+        if type(v) ~= 'table' or type(v.prefix) ~= "string" or (v.depend and type(v.depend) ~= 'table') then
+            error('Invalid input detected to preprocessArgs prefix table', 2)
+        end
+        preprocessSingleArg(v.prefix)
+        -- Only parse the depend parameter if the prefix parameter is present and not blank.
+        if args[v.prefix] and v.depend then
+            for j, dependValue in ipairs(v.depend) do
+                if type(dependValue) ~= 'string' then
+                    error('Invalid "depend" parameter value detected in preprocessArgs')
+                end
+                preprocessSingleArg(dependValue)
+            end
+        end
+    end
+
+    -- Get arguments with number suffixes.
+    local a = 1 -- Counter variable.
+    local moreArgumentsExist = true
+    while moreArgumentsExist == true do
+        moreArgumentsExist = false
+        for i = a, a + step - 1 do
+            for j,v in ipairs(prefixTable) do
+                local prefixArgName = v.prefix .. tostring(i)
+                if origArgs[prefixArgName] then
+                    moreArgumentsExist = true -- Do another loop if any arguments are found, even blank ones.
+                    preprocessSingleArg(prefixArgName)
+                end
+                -- Process the depend table if the prefix argument is present and not blank, or
+                -- we are processing "prefix1" and "prefix" is present and not blank, and
+                -- if the depend table is present.
+                if v.depend and (args[prefixArgName] or (i == 1 and args[v.prefix])) then
+                    for j,dependValue in ipairs(v.depend) do
+                        local dependArgName = dependValue .. tostring(i)
+                        preprocessSingleArg(dependArgName)
+                    end
+                end
+            end
+        end
+        a = a + step
+    end
+end
+ 
+function p.infobox(frame)
+    -- If called via #invoke, use the args passed into the invoking template.
+    -- Otherwise, for testing purposes, assume args are being passed directly in.
+    if frame == mw.getCurrentFrame() then
+        origArgs = frame:getParent().args
+    else
+        origArgs = frame
+    end
+    
+    -- Parse the data parameters in the same order that the old {{infobox}} did, so that
+    -- references etc. will display in the expected places. Parameters that depend on
+    -- another parameter are only processed if that parameter is present, to avoid
+    -- phantom references appearing in article reference lists.
+    preprocessSingleArg('child')
+    preprocessSingleArg('bodyclass')
+    preprocessSingleArg('subbox')
+    preprocessSingleArg('bodystyle')
+    preprocessSingleArg('title')
+    preprocessSingleArg('titleclass')
+    preprocessSingleArg('titlestyle')
+    preprocessSingleArg('above')
+    preprocessSingleArg('aboveclass')
+    preprocessSingleArg('abovestyle')
+    preprocessArgs({
+        {prefix = 'subheader', depend = {'subheaderstyle', 'subheaderrowclass'}}
+    }, 10)
+    preprocessSingleArg('subheaderstyle')
+    preprocessSingleArg('subheaderclass')
+    preprocessArgs({
+        {prefix = 'image', depend = {'caption', 'imagerowclass'}}
+    }, 10)
+    preprocessSingleArg('captionstyle')
+    preprocessSingleArg('imagestyle')
+    preprocessSingleArg('imageclass')
+    preprocessArgs({
+        {prefix = 'header'},
+        {prefix = 'data', depend = {'label'}},
+        {prefix = 'rowclass'},
+        {prefix = 'rowstyle'},
+        {prefix = 'rowcellstyle'},
+        {prefix = 'class'},
+        {prefix = 'dataid'},
+        {prefix = 'labelid'},
+        {prefix = 'headerid'},
+        {prefix = 'rowid'}
+    }, 50)
+    preprocessSingleArg('headerclass')
+    preprocessSingleArg('headerstyle')
+    preprocessSingleArg('labelstyle')
+    preprocessSingleArg('datastyle')
+    preprocessSingleArg('below')
+    preprocessSingleArg('belowclass')
+    preprocessSingleArg('belowstyle')
+    preprocessSingleArg('name')
+    args['italic title'] = origArgs['italic title'] -- different behaviour if blank or absent
+    preprocessSingleArg('decat')
+ 
+    return _infobox()
+end
+ 
+return p</text>
+      <sha1>fqwlmnh999j8i9ezhfasls5wwtsbxv1</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Module:Navbar</title>
+    <ns>828</ns>
+    <id>38827227</id>
+    <revision>
+      <id>948473991</id>
+      <parentid>948472522</parentid>
+      <timestamp>2020-04-01T06:30:21Z</timestamp>
+      <contributor>
+        <username>MusikAnimal</username>
+        <id>14882394</id>
+      </contributor>
+      <comment>Undid revision 948472521 by [[Special:Contributions/w&gt;MusikAnimal|w&gt;MusikAnimal]] ([[User talk:w&gt;MusikAnimal|talk]])</comment>
+      <model>Scribunto</model>
+      <format>text/plain</format>
+      <text bytes="3091" xml:space="preserve">local p = {}
+
+local getArgs
+local ul
+
+function p.addItem (mini, full, link, descrip, args, url)
+	local l
+	if url then
+		l = {'[', '', ']'}
+	else
+		l = {'[[', '|', ']]'}
+	end
+	ul:tag('li')
+		:addClass('nv-'..full)
+		:wikitext(l[1] .. link .. l[2])
+		:tag(args.mini and 'abbr' or 'span')
+			:attr('title', descrip..' this template')
+			:cssText(args.fontstyle)
+			:wikitext(args.mini and mini or full)
+			:done()
+		:wikitext(l[3])
+end
+
+function p.brackets (position, c, args, div)
+	if args.brackets then
+		div
+			:tag('span')
+				:css('margin-'..position, '-0.125em')
+				:cssText(args.fontstyle)
+				:wikitext(c)
+	end
+end
+
+function p._navbar(args)
+	local show = {true, true, true, false, false, false}
+	local titleArg = 1
+	
+	if args.collapsible then
+		titleArg = 2
+		if not args.plain then args.mini = 1 end
+		if args.fontcolor then
+			args.fontstyle = 'color:' .. args.fontcolor .. ';'
+		end
+		args.style = 'float:left; text-align:left'
+	end
+	
+	if args.template then
+		titleArg = 'template'
+		show = {true, false, false, false, false, false}
+		local index = {t = 2, d = 2, e = 3, h = 4, m = 5, w = 6, talk = 2, edit = 3, hist = 4, move = 5, watch = 6}
+		for k,v in ipairs(require ('Module:TableTools').compressSparseArray(args)) do
+			local num = index[v]
+			if num then show[num] = true end
+		end
+	end
+	
+	if args.noedit then show[3] = false end
+	
+	local titleText = args[titleArg] or (':' .. mw.getCurrentFrame():getParent():getTitle())
+	local title = mw.title.new(mw.text.trim(titleText), 'Template')
+	if not title then
+		error('Invalid title ' .. titleText)
+	end
+	local talkpage = title.talkPageTitle and title.talkPageTitle.fullText or ''
+	
+	local div = mw.html.create():tag('div')
+	div
+		:addClass('plainlinks')
+		:addClass('hlist')
+		:addClass('navbar')
+		:cssText(args.style)
+
+	if args.mini then div:addClass('mini') end
+
+	if not (args.mini or args.plain) then
+		div
+			:tag('span')
+				:css('word-spacing', 0)
+				:cssText(args.fontstyle)
+				:wikitext(args.text or 'This box:')
+				:wikitext(' ')
+	end
+	
+	p.brackets('right', '&amp;#91; ', args, div)
+	
+	ul = div:tag('ul')
+	if show[1] then p.addItem('v', 'view', title.fullText, 'View', args) end
+	if show[2] then p.addItem('t', 'talk', talkpage, 'Discuss', args) end
+	if show[3] then p.addItem('e', 'edit', title:fullUrl('action=edit'), 'Edit', args, true) end
+	if show[4] then p.addItem('h', 'hist', title:fullUrl('action=history'), 'History of', args, true) end
+	if show[5] then
+		local move = mw.title.new ('Special:Movepage')
+		p.addItem('m', 'move', move:fullUrl('target='..title.fullText), 'Move', args, true) end
+	if show[6] then p.addItem('w', 'watch', title:fullUrl('action=watch'), 'Watch', args, true) end
+	
+	p.brackets('left', ' &amp;#93;', args, div)
+	
+	if args.collapsible then
+		div
+			:done()
+		:tag('div')
+			:css('font-size', '114%')
+			:css('margin', args.mini and '0 4em' or '0 7em')
+			:cssText(args.fontstyle)
+			:wikitext(args[1])
+	end
+
+	return tostring(div:done())
+end
+
+function p.navbar(frame)
+	if not getArgs then
+		getArgs = require('Module:Arguments').getArgs
+	end
+	return p._navbar(getArgs(frame))
+end
+
+return p</text>
+      <sha1>0kto9e56pycr6rz0vadnqvghkpm06x9</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>Module:Arguments</title>
+    <ns>828</ns>
+    <id>41298065</id>
+    <revision>
+      <id>948472485</id>
+      <parentid>948472482</parentid>
+      <timestamp>2020-04-01T06:12:40Z</timestamp>
+      <contributor>
+        <username>MusikAnimal</username>
+        <id>14882394</id>
+      </contributor>
+      <minor/>
+      <comment>1 revision imported</comment>
+      <model>Scribunto</model>
+      <format>text/plain</format>
+      <text bytes="10054" xml:space="preserve">-- This module provides easy processing of arguments passed to Scribunto from
+-- #invoke. It is intended for use by other Lua modules, and should not be
+-- called from #invoke directly.
+
+local libraryUtil = require('libraryUtil')
+local checkType = libraryUtil.checkType
+
+local arguments = {}
+
+-- Generate four different tidyVal functions, so that we don't have to check the
+-- options every time we call it.
+
+local function tidyValDefault(key, val)
+	if type(val) == 'string' then
+		val = val:match('^%s*(.-)%s*$')
+		if val == '' then
+			return nil
+		else
+			return val
+		end
+	else
+		return val
+	end
+end
+
+local function tidyValTrimOnly(key, val)
+	if type(val) == 'string' then
+		return val:match('^%s*(.-)%s*$')
+	else
+		return val
+	end
+end
+
+local function tidyValRemoveBlanksOnly(key, val)
+	if type(val) == 'string' then
+		if val:find('%S') then
+			return val
+		else
+			return nil
+		end
+	else
+		return val
+	end
+end
+
+local function tidyValNoChange(key, val)
+	return val
+end
+
+local function matchesTitle(given, title)
+	local tp = type( given )
+	return (tp == 'string' or tp == 'number') and mw.title.new( given ).prefixedText == title
+end
+
+local translate_mt = { __index = function(t, k) return k end }
+
+function arguments.getArgs(frame, options)
+	checkType('getArgs', 1, frame, 'table', true)
+	checkType('getArgs', 2, options, 'table', true)
+	frame = frame or {}
+	options = options or {}
+
+	--[[
+	-- Set up argument translation.
+	--]]
+	options.translate = options.translate or {}
+	if getmetatable(options.translate) == nil then
+		setmetatable(options.translate, translate_mt)
+	end
+	if options.backtranslate == nil then
+		options.backtranslate = {}
+		for k,v in pairs(options.translate) do
+			options.backtranslate[v] = k
+		end
+	end
+	if options.backtranslate and getmetatable(options.backtranslate) == nil then
+		setmetatable(options.backtranslate, {
+			__index = function(t, k)
+				if options.translate[k] ~= k then
+					return nil
+				else
+					return k
+				end
+			end
+		})
+	end
+
+	--[[
+	-- Get the argument tables. If we were passed a valid frame object, get the
+	-- frame arguments (fargs) and the parent frame arguments (pargs), depending
+	-- on the options set and on the parent frame's availability. If we weren't
+	-- passed a valid frame object, we are being called from another Lua module
+	-- or from the debug console, so assume that we were passed a table of args
+	-- directly, and assign it to a new variable (luaArgs).
+	--]]
+	local fargs, pargs, luaArgs
+	if type(frame.args) == 'table' and type(frame.getParent) == 'function' then
+		if options.wrappers then
+			--[[
+			-- The wrappers option makes Module:Arguments look up arguments in
+			-- either the frame argument table or the parent argument table, but
+			-- not both. This means that users can use either the #invoke syntax
+			-- or a wrapper template without the loss of performance associated
+			-- with looking arguments up in both the frame and the parent frame.
+			-- Module:Arguments will look up arguments in the parent frame
+			-- if it finds the parent frame's title in options.wrapper;
+			-- otherwise it will look up arguments in the frame object passed
+			-- to getArgs.
+			--]]
+			local parent = frame:getParent()
+			if not parent then
+				fargs = frame.args
+			else
+				local title = parent:getTitle():gsub('/sandbox$', '')
+				local found = false
+				if matchesTitle(options.wrappers, title) then
+					found = true
+				elseif type(options.wrappers) == 'table' then
+					for _,v in pairs(options.wrappers) do
+						if matchesTitle(v, title) then
+							found = true
+							break
+						end
+					end
+				end
+
+				-- We test for false specifically here so that nil (the default) acts like true.
+				if found or options.frameOnly == false then
+					pargs = parent.args
+				end
+				if not found or options.parentOnly == false then
+					fargs = frame.args
+				end
+			end
+		else
+			-- options.wrapper isn't set, so check the other options.
+			if not options.parentOnly then
+				fargs = frame.args
+			end
+			if not options.frameOnly then
+				local parent = frame:getParent()
+				pargs = parent and parent.args or nil
+			end
+		end
+		if options.parentFirst then
+			fargs, pargs = pargs, fargs
+		end
+	else
+		luaArgs = frame
+	end
+
+	-- Set the order of precedence of the argument tables. If the variables are
+	-- nil, nothing will be added to the table, which is how we avoid clashes
+	-- between the frame/parent args and the Lua args.
+	local argTables = {fargs}
+	argTables[#argTables + 1] = pargs
+	argTables[#argTables + 1] = luaArgs
+
+	--[[
+	-- Generate the tidyVal function. If it has been specified by the user, we
+	-- use that; if not, we choose one of four functions depending on the
+	-- options chosen. This is so that we don't have to call the options table
+	-- every time the function is called.
+	--]]
+	local tidyVal = options.valueFunc
+	if tidyVal then
+		if type(tidyVal) ~= 'function' then
+			error(
+				"bad value assigned to option 'valueFunc'"
+					.. '(function expected, got '
+					.. type(tidyVal)
+					.. ')',
+				2
+			)
+		end
+	elseif options.trim ~= false then
+		if options.removeBlanks ~= false then
+			tidyVal = tidyValDefault
+		else
+			tidyVal = tidyValTrimOnly
+		end
+	else
+		if options.removeBlanks ~= false then
+			tidyVal = tidyValRemoveBlanksOnly
+		else
+			tidyVal = tidyValNoChange
+		end
+	end
+
+	--[[
+	-- Set up the args, metaArgs and nilArgs tables. args will be the one
+	-- accessed from functions, and metaArgs will hold the actual arguments. Nil
+	-- arguments are memoized in nilArgs, and the metatable connects all of them
+	-- together.
+	--]]
+	local args, metaArgs, nilArgs, metatable = {}, {}, {}, {}
+	setmetatable(args, metatable)
+
+	local function mergeArgs(tables)
+		--[[
+		-- Accepts multiple tables as input and merges their keys and values
+		-- into one table. If a value is already present it is not overwritten;
+		-- tables listed earlier have precedence. We are also memoizing nil
+		-- values, which can be overwritten if they are 's' (soft).
+		--]]
+		for _, t in ipairs(tables) do
+			for key, val in pairs(t) do
+				if metaArgs[key] == nil and nilArgs[key] ~= 'h' then
+					local tidiedVal = tidyVal(key, val)
+					if tidiedVal == nil then
+						nilArgs[key] = 's'
+					else
+						metaArgs[key] = tidiedVal
+					end
+				end
+			end
+		end
+	end
+
+	--[[
+	-- Define metatable behaviour. Arguments are memoized in the metaArgs table,
+	-- and are only fetched from the argument tables once. Fetching arguments
+	-- from the argument tables is the most resource-intensive step in this
+	-- module, so we try and avoid it where possible. For this reason, nil
+	-- arguments are also memoized, in the nilArgs table. Also, we keep a record
+	-- in the metatable of when pairs and ipairs have been called, so we do not
+	-- run pairs and ipairs on the argument tables more than once. We also do
+	-- not run ipairs on fargs and pargs if pairs has already been run, as all
+	-- the arguments will already have been copied over.
+	--]]
+
+	metatable.__index = function (t, key)
+		--[[
+		-- Fetches an argument when the args table is indexed. First we check
+		-- to see if the value is memoized, and if not we try and fetch it from
+		-- the argument tables. When we check memoization, we need to check
+		-- metaArgs before nilArgs, as both can be non-nil at the same time.
+		-- If the argument is not present in metaArgs, we also check whether
+		-- pairs has been run yet. If pairs has already been run, we return nil.
+		-- This is because all the arguments will have already been copied into
+		-- metaArgs by the mergeArgs function, meaning that any other arguments
+		-- must be nil.
+		--]]
+		if type(key) == 'string' then
+			key = options.translate[key]
+		end
+		local val = metaArgs[key]
+		if val ~= nil then
+			return val
+		elseif metatable.donePairs or nilArgs[key] then
+			return nil
+		end
+		for _, argTable in ipairs(argTables) do
+			local argTableVal = tidyVal(key, argTable[key])
+			if argTableVal ~= nil then
+				metaArgs[key] = argTableVal
+				return argTableVal
+			end
+		end
+		nilArgs[key] = 'h'
+		return nil
+	end
+
+	metatable.__newindex = function (t, key, val)
+		-- This function is called when a module tries to add a new value to the
+		-- args table, or tries to change an existing value.
+		if type(key) == 'string' then
+			key = options.translate[key]
+		end
+		if options.readOnly then
+			error(
+				'could not write to argument table key "'
+					.. tostring(key)
+					.. '"; the table is read-only',
+				2
+			)
+		elseif options.noOverwrite and args[key] ~= nil then
+			error(
+				'could not write to argument table key "'
+					.. tostring(key)
+					.. '"; overwriting existing arguments is not permitted',
+				2
+			)
+		elseif val == nil then
+			--[[
+			-- If the argument is to be overwritten with nil, we need to erase
+			-- the value in metaArgs, so that __index, __pairs and __ipairs do
+			-- not use a previous existing value, if present; and we also need
+			-- to memoize the nil in nilArgs, so that the value isn't looked
+			-- up in the argument tables if it is accessed again.
+			--]]
+			metaArgs[key] = nil
+			nilArgs[key] = 'h'
+		else
+			metaArgs[key] = val
+		end
+	end
+
+	local function translatenext(invariant)
+		local k, v = next(invariant.t, invariant.k)
+		invariant.k = k
+		if k == nil then
+			return nil
+		elseif type(k) ~= 'string' or not options.backtranslate then
+			return k, v
+		else
+			local backtranslate = options.backtranslate[k]
+			if backtranslate == nil then
+				-- Skip this one. This is a tail call, so this won't cause stack overflow
+				return translatenext(invariant)
+			else
+				return backtranslate, v
+			end
+		end
+	end
+
+	metatable.__pairs = function ()
+		-- Called when pairs is run on the args table.
+		if not metatable.donePairs then
+			mergeArgs(argTables)
+			metatable.donePairs = true
+		end
+		return translatenext, { t = metaArgs }
+	end
+
+	local function inext(t, i)
+		-- This uses our __index metamethod
+		local v = t[i + 1]
+		if v ~= nil then
+			return i + 1, v
+		end
+	end
+
+	metatable.__ipairs = function (t)
+		-- Called when ipairs is run on the args table.
+		return inext, t, 0
+	end
+
+	return args
+end
+
+return arguments</text>
+      <sha1>5qx9tzlul9ser30uxj9nbasjt92cevn</sha1>
+    </revision>
+  </page>
+  <page>
+    <title>MediaWiki:Common.css</title>
+    <ns>8</ns>
+    <id>2213345</id>
+    <revision>
+      <id>949645617</id>
+      <parentid>949645555</parentid>
+      <timestamp>2020-04-07T18:04:40Z</timestamp>
+      <contributor>
+        <username>Krinkle</username>
+        <id>9014223</id>
+      </contributor>
+      <comment>Maintenance: Remove redundant rule for 'pre,.mw-code'. 'white-space: pre-wrap;     word-wrap: break-word;' are part of the software already</comment>
+      <model>css</model>
+      <format>text/css</format>
+      <text bytes="29005" xml:space="preserve">/* Reset italic styling set by user agent */
+cite, dfn {
+	font-style: inherit;
+}
+
+/* Straight quote marks for &lt;q&gt; */
+q {
+	quotes: '"' '"' "'" "'";
+}
+
+/* Avoid collision of blockquote with floating elements by swapping margin and padding */
+blockquote {
+	overflow: hidden;
+	margin: 1em 0;
+	padding: 0 40px;
+}
+
+/* Consistent size for &lt;small&gt;, &lt;sub&gt; and &lt;sup&gt; */
+small {
+	font-size: 85%;
+}
+.mw-body-content sub,
+.mw-body-content sup,
+span.reference /* for Parsoid */ {
+	font-size: 80%;
+}
+
+/* Same spacing for indented and unindented paragraphs on talk pages */
+.ns-talk .mw-body-content dd {
+	margin-top: 0.4em;
+	margin-bottom: 0.4em;
+}
+
+/* Main page fixes */
+#interwiki-completelist {
+	font-weight: bold;
+}
+
+/* Reduce page jumps by hiding collapsed/dismissed content */
+.client-js .mw-special-Watchlist #watchlist-message,
+.client-js .NavFrame.collapsed .NavContent,
+.client-js .collapsible:not( .mw-made-collapsible).collapsed &gt; tbody &gt; tr:not(:first-child) {
+	display: none;
+}
+
+/* Adds padding above Watchlist announcements where new recentchanges/watchlist filters are enabled */
+.mw-rcfilters-enabled .mw-specialpage-summary {
+	margin-top: 1em;
+}
+
+/* Hide charinsert base for those not using the gadget */
+#editpage-specialchars {
+	display: none;
+}
+
+/* Highlight linked elements (such as clicked references) in blue */
+body.action-info .mw-body-content :target,
+.citation:target {
+	background-color: #def;  /* Fallback */
+	background-color: rgba(0, 127, 255, 0.133);
+}
+
+/* Styling for citations. Breaks long urls, etc., rather than overflowing box */
+.citation {
+	word-wrap: break-word;
+}
+
+/* For linked citation numbers and document IDs, where the number need not be shown
+   on a screen or a handheld, but should be included in the printed version */
+@media screen, handheld {
+	.citation .printonly {
+		display: none;
+	}
+}
+
+/* Make the list of references smaller */
+/* Keep in sync with Template:Refbegin/styles.css */
+ol.references,
+div.reflist {
+	font-size: 90%;            /* Default font-size */
+	margin-bottom: 0.5em;
+}
+div.reflist ol.references {
+	font-size: 100%;           /* Reset font-size when nested in div.reflist */
+	margin-bottom: 0;          /* Avoid double margin when nested in div.reflist */
+	list-style-type: inherit;  /* Enable custom list style types */
+}
+
+/* Allow hidden ref errors to be shown by user CSS */
+/* TemplateStyles */
+span.brokenref {
+	display: none;
+}
+
+/* Reset top margin for lists embedded in columns */
+div.columns {
+	margin-top: 0.3em;
+}
+div.columns dl,
+div.columns ol,
+div.columns ul {
+	margin-top: 0;
+}
+
+/* Avoid elements breaking between columns */
+.nocolbreak,
+div.columns li,
+div.columns dd {
+	-webkit-column-break-inside: avoid;
+	page-break-inside: avoid;
+	break-inside: avoid-column;
+}
+
+/* Style for horizontal lists (separator following item).
+   @source mediawiki.org/wiki/Snippets/Horizontal_lists
+   @revision 8 (2016-05-21)
+   @author [[User:Edokter]]
+ */
+.hlist dl,
+.hlist ol,
+.hlist ul {
+	margin: 0;
+	padding: 0;
+}
+/* Display list items inline */
+.hlist dd,
+.hlist dt,
+.hlist li {
+	margin: 0;
+	display: inline;
+}
+/* Display nested lists inline */
+.hlist.inline,
+.hlist.inline dl,
+.hlist.inline ol,
+.hlist.inline ul,
+.hlist dl dl, .hlist dl ol, .hlist dl ul,
+.hlist ol dl, .hlist ol ol, .hlist ol ul,
+.hlist ul dl, .hlist ul ol, .hlist ul ul {
+	display: inline;
+}
+/* Hide empty list items */
+.hlist .mw-empty-li {
+	display: none;
+}
+/* Generate interpuncts */
+.hlist dt:after {
+	content: ": ";
+}
+/**
+ * Note hlist style usage differd in
+ * the Minerva skin. Remember .hlist is a class defined in core as well! Please check Minerva desktop (and Minerva.css) when changing
+ * See https://phabricator.wikimedia.org/T213239
+ */
+.hlist dd:after,
+.hlist li:after {
+	content: " · ";
+	font-weight: bold;
+}
+.hlist dd:last-child:after,
+.hlist dt:last-child:after,
+.hlist li:last-child:after {
+	content: none;
+}
+/* Add parentheses around nested lists */
+.hlist dd dd:first-child:before, .hlist dd dt:first-child:before, .hlist dd li:first-child:before,
+.hlist dt dd:first-child:before, .hlist dt dt:first-child:before, .hlist dt li:first-child:before,
+.hlist li dd:first-child:before, .hlist li dt:first-child:before, .hlist li li:first-child:before {
+	content: " (";
+	font-weight: normal;
+}
+.hlist dd dd:last-child:after, .hlist dd dt:last-child:after, .hlist dd li:last-child:after,
+.hlist dt dd:last-child:after, .hlist dt dt:last-child:after, .hlist dt li:last-child:after,
+.hlist li dd:last-child:after, .hlist li dt:last-child:after, .hlist li li:last-child:after {
+	content: ")";
+	font-weight: normal;
+}
+/* Put ordinals in front of ordered list items */
+.hlist ol {
+	counter-reset: listitem;
+}
+.hlist ol &gt; li {
+	counter-increment: listitem;
+}
+.hlist ol &gt; li:before {
+	content: " " counter(listitem) "\a0";
+}
+.hlist dd ol &gt; li:first-child:before,
+.hlist dt ol &gt; li:first-child:before,
+.hlist li ol &gt; li:first-child:before {
+	content: " (" counter(listitem) "\a0";
+}
+
+/* Unbulleted lists */
+.plainlist ol,
+.plainlist ul {
+	line-height: inherit;
+	list-style: none none;
+	margin: 0;
+}
+.plainlist ol li,
+.plainlist ul li {
+	margin-bottom: 0;
+}
+
+/* Default style for navigation boxes */
+.navbox {                     /* Navbox container style */
+	box-sizing: border-box;
+	border: 1px solid #a2a9b1;
+	width: 100%;
+	clear: both;
+	font-size: 88%;
+	text-align: center;
+	padding: 1px;
+	margin: 1em auto 0;       /* Prevent preceding content from clinging to navboxes */
+}
+.navbox .navbox {
+	margin-top: 0;            /* No top margin for nested navboxes */
+}
+.navbox + .navbox {
+	margin-top: -1px;         /* Single pixel border between adjacent navboxes */
+}
+.navbox-inner,
+.navbox-subgroup {
+	width: 100%;
+}
+.navbox-group,
+.navbox-title,
+.navbox-abovebelow {
+	padding: 0.25em 1em;      /* Title, group and above/below styles */
+	line-height: 1.5em;
+	text-align: center;
+}
+th.navbox-group {             /* Group style */
+	white-space: nowrap;
+	/* @noflip */
+	text-align: right;
+}
+.navbox,
+.navbox-subgroup {
+	background-color: #fdfdfd; /* Background color */
+}
+.navbox-list {
+	line-height: 1.5em;
+	border-color: #fdfdfd;    /* Must match background color */
+}
+/* cell spacing for navbox cells */
+tr + tr &gt; .navbox-abovebelow,
+tr + tr &gt; .navbox-group,
+tr + tr &gt; .navbox-image,
+tr + tr &gt; .navbox-list {    /* Borders above 2nd, 3rd, etc. rows */
+	border-top: 2px solid #fdfdfd; /* Must match background color */
+}
+.navbox th,
+.navbox-title {
+	background-color: #ccccff;      /* Level 1 color */
+}
+.navbox-abovebelow,
+th.navbox-group,
+.navbox-subgroup .navbox-title {
+	background-color: #ddddff;      /* Level 2 color */
+}
+.navbox-subgroup .navbox-group,
+.navbox-subgroup .navbox-abovebelow {
+	background-color: #e6e6ff;      /* Level 3 color */
+}
+.navbox-even {
+	background-color: #f7f7f7;      /* Even row striping */
+}
+.navbox-odd {
+	background-color: transparent;  /* Odd row striping */
+}
+.navbox .hlist td dl,
+.navbox .hlist td ol,
+.navbox .hlist td ul,
+.navbox td.hlist dl,
+.navbox td.hlist ol,
+.navbox td.hlist ul {
+	padding: 0.125em 0;       /* Adjust hlist padding in navboxes */
+}
+
+/* Default styling for Navbar template */
+.navbar {
+	display: inline;
+	font-size: 88%;
+	font-weight: normal;
+}
+.navbar ul {
+	display: inline-block;
+	white-space: nowrap;
+}
+.mw-body-content .navbar ul {
+	line-height: inherit;
+}
+.navbar li {
+	word-spacing: -0.125em;
+}
+.navbar.mini li abbr[title] {
+	font-variant: small-caps;
+	border-bottom: none;
+	text-decoration: none;
+	cursor: inherit;
+}
+/* Navbar styling when nested in infobox and navbox */
+.infobox .navbar {
+	font-size: 100%;
+}
+.navbox .navbar {
+	display: block;
+	font-size: 100%;
+}
+.navbox-title .navbar {
+	/* @noflip */
+	float: left;
+	/* @noflip */
+	text-align: left;
+	/* @noflip */
+	margin-right: 0.5em;
+}
+
+/* Styling for JQuery makeCollapsible, matching that of collapseButton */
+.mw-parser-output .mw-collapsible-toggle {
+	font-weight: normal;
+	/* @noflip */
+	text-align: right;
+	padding-right: 0.2em;
+	padding-left: 0.2em;
+}
+.mw-collapsible-leftside-toggle .mw-collapsible-toggle {
+	/* @noflip */
+	float: left;
+	/* @noflip */
+	text-align: left;
+}
+
+/* Infobox template style */
+.infobox {
+	border: 1px solid #a2a9b1;
+	border-spacing: 3px;
+	background-color: #f8f9fa;
+	color: black;
+	/* @noflip */
+	margin: 0.5em 0 0.5em 1em;
+	padding: 0.2em;
+	/* @noflip */
+	float: right;
+	/* @noflip */
+	clear: right;
+	font-size: 88%;
+	line-height: 1.5em;
+}
+.infobox caption {
+	font-size: 125%;
+	font-weight: bold;
+	padding: 0.2em;
+	text-align: center;
+}
+.infobox td,
+.infobox th {
+	vertical-align: top;
+	/* @noflip */
+	text-align: left;
+}
+.infobox.bordered {
+	border-collapse: collapse;
+}
+.infobox.bordered td,
+.infobox.bordered th {
+	border: 1px solid #a2a9b1;
+}
+.infobox.bordered .borderless td,
+.infobox.bordered .borderless th {
+	border: 0;
+}
+
+.infobox.sisterproject {
+	width: 20em;
+	font-size: 90%;
+}
+
+.infobox.standard-talk {
+	border: 1px solid #c0c090;
+	background-color: #f8eaba;
+}
+.infobox.standard-talk.bordered td,
+.infobox.standard-talk.bordered th {
+	border: 1px solid #c0c090;
+}
+
+/* styles for bordered infobox with merged rows */
+.infobox.bordered .mergedtoprow td,
+.infobox.bordered .mergedtoprow th {
+	border: 0;
+	border-top: 1px solid #a2a9b1;
+	/* @noflip */
+	border-right: 1px solid #a2a9b1;
+}
+
+.infobox.bordered .mergedrow td,
+.infobox.bordered .mergedrow th {
+	border: 0;
+	/* @noflip */
+	border-right: 1px solid #a2a9b1;
+}
+
+/* Styles for geography infoboxes, eg countries,
+   country subdivisions, cities, etc.            */
+.infobox.geography {
+	border-collapse: collapse;
+	line-height: 1.2em;
+	font-size: 90%;
+}
+
+.infobox.geography  td,
+.infobox.geography  th {
+	border-top: 1px solid #a2a9b1;
+	padding: 0.4em 0.6em 0.4em 0.6em;
+}
+.infobox.geography .mergedtoprow td,
+.infobox.geography .mergedtoprow th {
+	border-top: 1px solid #a2a9b1;
+	padding: 0.4em 0.6em 0.2em 0.6em;
+}
+
+.infobox.geography .mergedrow td,
+.infobox.geography .mergedrow th {
+	border: 0;
+	padding: 0 0.6em 0.2em 0.6em;
+}
+
+.infobox.geography .mergedbottomrow td,
+.infobox.geography .mergedbottomrow th {
+	border-top: 0;
+	border-bottom: 1px solid #a2a9b1;
+	padding: 0 0.6em 0.4em 0.6em;
+}
+
+.infobox.geography .maptable td,
+.infobox.geography .maptable th {
+	border: 0;
+	padding: 0;
+}
+
+/* Normal font styling for wikitable row headers with scope="row" tag */
+.wikitable.plainrowheaders th[scope=row] {
+	font-weight: normal;
+	/* @noflip */
+	text-align: left;
+}
+
+/* Lists in wikitable data cells are always left-aligned */
+.wikitable td ul,
+.wikitable td ol,
+.wikitable td dl {
+	/* @noflip */
+	text-align: left;
+}
+/* ...unless they also use the hlist class */
+.toc.hlist ul,
+#toc.hlist ul,
+.wikitable.hlist td ul,
+.wikitable.hlist td ol,
+.wikitable.hlist td dl {
+	text-align: inherit;
+}
+
+/* Icons for medialist templates [[Template:Listen]],
+   [[Template:Multi-listen_start]], [[Template:Video]],
+   [[Template:Multi-video_start]] */
+/* TemplateStyles */
+div.listenlist {
+	background: url("//upload.wikimedia.org/wikipedia/commons/4/47/Sound-icon.svg") no-repeat scroll 0 0 transparent;
+	background-size: 30px;
+	padding-left: 40px;
+}
+
+/* Fix for hieroglyphs specificity issue in infoboxes ([[phab:T43869]]) */
+table.mw-hiero-table td {
+	vertical-align: middle;
+}
+
+/* Change the external link icon to an Adobe icon for all PDF files */
+.mw-parser-output a[href$=".pdf"].external,
+.mw-parser-output a[href*=".pdf?"].external,
+.mw-parser-output a[href*=".pdf#"].external,
+.mw-parser-output a[href$=".PDF"].external,
+.mw-parser-output a[href*=".PDF?"].external,
+.mw-parser-output a[href*=".PDF#"].external {
+	background: url("//upload.wikimedia.org/wikipedia/commons/2/23/Icons-mini-file_acrobat.gif") no-repeat right;
+	/* @noflip */
+	padding-right: 18px;
+}
+
+/* Messagebox templates */
+.messagebox {
+	border: 1px solid #a2a9b1;
+	background-color: #f8f9fa;
+	width: 80%;
+	margin: 0 auto 1em auto;
+	padding: .2em;
+}
+.messagebox.merge {
+	border: 1px solid #c0b8cc;
+	background-color: #f0e5ff;
+	text-align: center;
+}
+.messagebox.cleanup {
+	border: 1px solid #9f9fff;
+	background-color: #efefff;
+	text-align: center;
+}
+.messagebox.standard-talk {
+	border: 1px solid #c0c090;
+	background-color: #f8eaba;
+	margin: 4px auto;
+}
+/* For old WikiProject banners inside banner shells. */
+.mbox-inside .standard-talk,
+.messagebox.nested-talk {
+	border: 1px solid #c0c090;
+	background-color: #f8eaba;
+	width: 100%;
+	margin: 2px 0;
+	padding: 2px;
+}
+.messagebox.small {
+	width: 238px;
+	font-size: 85%;
+	/* @noflip */
+	float: right;
+	clear: both;
+	/* @noflip */
+	margin: 0 0 1em 1em;
+	line-height: 1.25em;
+}
+.messagebox.small-talk {
+	width: 238px;
+	font-size: 85%;
+	/* @noflip */
+	float: right;
+	clear: both;
+	/* @noflip */
+	margin: 0 0 1em 1em;
+	line-height: 1.25em;
+	background-color: #f8eaba;
+}
+
+/* Cell sizes for ambox/tmbox/imbox/cmbox/ombox/fmbox/dmbox message boxes */
+th.mbox-text, td.mbox-text {   /* The message body cell(s) */
+	border: none;
+	/* @noflip */
+	padding: 0.25em 0.9em;     /* 0.9em left/right */
+	width: 100%;               /* Make all mboxes the same width regardless of text length */
+}
+td.mbox-image {                /* The left image cell */
+	border: none;
+	/* @noflip */
+	padding: 2px 0 2px 0.9em;  /* 0.9em left, 0px right */
+	text-align: center;
+}
+td.mbox-imageright {           /* The right image cell */
+	border: none;
+	/* @noflip */
+	padding: 2px 0.9em 2px 0;  /* 0px left, 0.9em right */
+	text-align: center;
+}
+td.mbox-empty-cell {           /* An empty narrow cell */
+	border: none;
+	padding: 0;
+	width: 1px;
+}
+
+/* Article message box styles */
+table.ambox {
+	margin: 0 10%;                  /* 10% = Will not overlap with other elements */
+	border: 1px solid #a2a9b1;
+	/* @noflip */
+	border-left: 10px solid #36c;  /* Default "notice" blue */
+	background-color: #fbfbfb;
+	box-sizing: border-box;
+}
+table.ambox + table.ambox {      /* Single border between stacked boxes. */
+	margin-top: -1px;
+}
+.ambox th.mbox-text,
+.ambox td.mbox-text {            /* The message body cell(s) */
+	padding: 0.25em 0.5em;       /* 0.5em left/right */
+}
+.ambox td.mbox-image {           /* The left image cell */
+	/* @noflip */
+	padding: 2px 0 2px 0.5em;    /* 0.5em left, 0px right */
+}
+.ambox td.mbox-imageright {      /* The right image cell */
+	/* @noflip */
+	padding: 2px 0.5em 2px 0;    /* 0px left, 0.5em right */
+}
+
+table.ambox-notice {
+	/* @noflip */
+	border-left: 10px solid #36c;       /* Blue */
+}
+table.ambox-speedy {
+	/* @noflip */
+	border-left: 10px solid #b32424;    /* Red */
+	background-color: #fee7e6;          /* Pink */
+}
+table.ambox-delete {
+	/* @noflip */
+	border-left: 10px solid #b32424;    /* Red */
+}
+table.ambox-content {
+	/* @noflip */
+	border-left: 10px solid #f28500;    /* Orange */
+}
+table.ambox-style {
+	/* @noflip */
+	border-left: 10px solid #fc3;       /* Yellow */
+}
+table.ambox-move {
+	/* @noflip */
+	border-left: 10px solid #9932cc;    /* Purple */
+}
+table.ambox-protection {
+	/* @noflip */
+	border-left: 10px solid #a2a9b1;    /* Gray-gold */
+}
+
+/* Image message box styles */
+table.imbox {
+	margin: 4px 10%;
+	border-collapse: collapse;
+	border: 3px solid #36c;    /* Default "notice" blue */
+	background-color: #fbfbfb;
+	box-sizing: border-box;
+}
+.imbox .mbox-text .imbox {  /* For imboxes inside imbox-text cells. */
+	margin: 0 -0.5em;       /* 0.9 - 0.5 = 0.4em left/right.        */
+	display: block;         /* Fix for webkit to force 100% width.  */
+}
+.mbox-inside .imbox {       /* For imboxes inside other templates.  */
+	margin: 4px;
+}
+
+table.imbox-notice {
+	border: 3px solid #36c;       /* Blue */
+}
+table.imbox-speedy {
+	border: 3px solid #b32424;    /* Red */
+	background-color: #fee7e6;    /* Pink */
+}
+table.imbox-delete {
+	border: 3px solid #b32424;    /* Red */
+}
+table.imbox-content {
+	border: 3px solid #f28500;    /* Orange */
+}
+table.imbox-style {
+	border: 3px solid #fc3;       /* Yellow */
+}
+table.imbox-move {
+	border: 3px solid #9932cc;    /* Purple */
+}
+table.imbox-protection {
+	border: 3px solid #a2a9b1;    /* Gray-gold */
+}
+table.imbox-license {
+	border: 3px solid #88a;       /* Dark gray */
+	background-color: #f7f8ff;    /* Light gray */
+}
+table.imbox-featured {
+	border: 3px solid #cba135;    /* Brown-gold */
+}
+
+/* Category message box styles */
+table.cmbox {
+	margin: 3px 10%;
+	border-collapse: collapse;
+	border: 1px solid #a2a9b1;
+	background-color: #dfe8ff;    /* Default "notice" blue */
+	box-sizing: border-box;
+}
+
+table.cmbox-notice {
+	background-color: #d8e8ff;    /* Blue */
+}
+table.cmbox-speedy {
+	margin-top: 4px;
+	margin-bottom: 4px;
+	border: 4px solid #b32424;    /* Red */
+	background-color: #ffdbdb;    /* Pink */
+}
+table.cmbox-delete {
+	background-color: #ffdbdb;    /* Pink */
+}
+table.cmbox-content {
+	background-color: #ffe7ce;    /* Orange */
+}
+table.cmbox-style {
+	background-color: #fff9db;    /* Yellow */
+}
+table.cmbox-move {
+	background-color: #e4d8ff;    /* Purple */
+}
+table.cmbox-protection {
+	background-color: #efefe1;    /* Gray-gold */
+}
+
+/* Other pages message box styles */
+table.ombox {
+	margin: 4px 10%;
+	border-collapse: collapse;
+	border: 1px solid #a2a9b1;    /* Default "notice" gray */
+	background-color: #f8f9fa;
+	box-sizing: border-box;
+}
+
+table.ombox-notice {
+	border: 1px solid #a2a9b1;    /* Gray */
+}
+table.ombox-speedy {
+	border: 2px solid #b32424;    /* Red */
+	background-color: #fee7e6;    /* Pink */
+}
+table.ombox-delete {
+	border: 2px solid #b32424;    /* Red */
+}
+table.ombox-content {
+	border: 1px solid #f28500;    /* Orange */
+}
+table.ombox-style {
+	border: 1px solid #fc3;       /* Yellow */
+}
+table.ombox-move {
+	border: 1px solid #9932cc;    /* Purple */
+}
+table.ombox-protection {
+	border: 2px solid #a2a9b1;    /* Gray-gold */
+}
+
+/* Talk page message box styles */
+table.tmbox {
+	margin: 4px 10%;
+	border-collapse: collapse;
+	border: 1px solid #c0c090;    /* Default "notice" gray-brown */
+	background-color: #f8eaba;
+	min-width: 80%;
+	box-sizing: border-box;
+}
+.tmbox.mbox-small {
+	min-width: 0;                /* reset the min-width of tmbox above        */
+}
+.mediawiki .mbox-inside .tmbox { /* For tmboxes inside other templates. The "mediawiki" class ensures that */
+	margin: 2px 0;               /* this declaration overrides other styles (including mbox-small above)   */
+	width: 100%;                 /* For Safari and Opera */
+}
+.mbox-inside .tmbox.mbox-small { /* "small" tmboxes should not be small when  */
+	line-height: 1.5em;          /* also "nested", so reset styles that are   */
+	font-size: 100%;             /* set in "mbox-small" above.                */
+}
+
+table.tmbox-speedy {
+	border: 2px solid #b32424;    /* Red */
+	background-color: #fee7e6;    /* Pink */
+}
+table.tmbox-delete {
+	border: 2px solid #b32424;    /* Red */
+}
+table.tmbox-content {
+	border: 2px solid #f28500;    /* Orange */
+}
+table.tmbox-style {
+	border: 2px solid #fc3;       /* Yellow */
+}
+table.tmbox-move {
+	border: 2px solid #9932cc;    /* Purple */
+}
+table.tmbox-protection,
+table.tmbox-notice {
+	border: 1px solid #c0c090;    /* Gray-brown */
+}
+
+/* Footer and header message box styles */
+table.fmbox {
+	clear: both;
+	margin: 0.2em 0;
+	width: 100%;
+	border: 1px solid #a2a9b1;
+	background-color: #f8f9fa;     /* Default "system" gray */
+	box-sizing: border-box;
+}
+table.fmbox-system {
+	background-color: #f8f9fa;
+}
+table.fmbox-warning {
+	border: 1px solid #bb7070;  /* Dark pink */
+	background-color: #ffdbdb;  /* Pink */
+}
+table.fmbox-editnotice {
+	background-color: transparent;
+}
+/* Div based "warning" style fmbox messages. */
+div.mw-warning-with-logexcerpt,
+div.mw-lag-warn-high,
+div.mw-cascadeprotectedwarning,
+div#mw-protect-cascadeon,
+div.titleblacklist-warning,
+div.locked-warning {
+	clear: both;
+	margin: 0.2em 0;
+	border: 1px solid #bb7070;
+	background-color: #ffdbdb;
+	padding: 0.25em 0.9em;
+	box-sizing: border-box;
+}
+
+/* These mbox-small classes must be placed after all other
+   ambox/tmbox/ombox etc classes. "html body.mediawiki" is so
+   they override "table.ambox + table.ambox" above. */
+html body.mediawiki .mbox-small {   /* For the "small=yes" option. */
+	/* @noflip */
+	clear: right;
+	/* @noflip */
+	float: right;
+	/* @noflip */
+	margin: 4px 0 4px 1em;
+	box-sizing: border-box;
+	width: 238px;
+	font-size: 88%;
+	line-height: 1.25em;
+}
+html body.mediawiki .mbox-small-left {   /* For the "small=left" option. */
+	/* @noflip */
+	margin: 4px 1em 4px 0;
+	box-sizing: border-box;
+	overflow: hidden;
+	width: 238px;
+	border-collapse: collapse;
+	font-size: 88%;
+	line-height: 1.25em;
+}
+
+/* Style for compact ambox */
+/* Hide the images */
+.compact-ambox table .mbox-image,
+.compact-ambox table .mbox-imageright,
+.compact-ambox table .mbox-empty-cell {
+	display: none;
+}
+/* Remove borders, backgrounds, padding, etc. */
+.compact-ambox table.ambox {
+	border: none;
+	border-collapse: collapse;
+	background-color: transparent;
+	margin: 0 0 0 1.6em !important;
+	padding: 0 !important;
+	width: auto;
+	display: block;
+}
+body.mediawiki .compact-ambox table.mbox-small-left {
+	font-size: 100%;
+	width: auto;
+	margin: 0;
+}
+/* Style the text cell as a list item and remove its padding */
+.compact-ambox table .mbox-text {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+.compact-ambox table .mbox-text-span {
+	display: list-item;
+	line-height: 1.5em;
+	list-style-type: square;
+	list-style-image: url(/w/skins/MonoBook/resources/images/bullet.svg);
+}
+.skin-vector .compact-ambox table .mbox-text-span {
+	list-style-type: disc;
+	list-style-image: url(/w/skins/Vector/images/bullet-icon.svg);
+}
+/* Allow for hiding text in compact form */
+.compact-ambox .hide-when-compact {
+	display: none;
+}
+
+/* Hide (formatting) elements from screen, but not from screenreaders */
+.visualhide {
+	position: absolute;
+	left: -10000px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* Suppress missing interwiki image links where #ifexist cannot
+   be used due to high number of requests. See .hidden-redlink on
+   [[m:MediaWiki:Common.css]] */
+.check-icon a.new {
+	display: none;
+	speak: none;
+}
+
+/* Remove underlines from certain links */
+.nounderlines a,
+.IPA a:link, .IPA a:visited {
+	text-decoration: none !important;
+}
+
+/* Standard Navigationsleisten, aka box hiding thingy
+   from .de.  Documentation at [[Wikipedia:NavFrame]]. */
+div.NavFrame {
+	margin: 0;
+	padding: 4px;
+	border: 1px solid #a2a9b1;
+	text-align: center;
+	border-collapse: collapse;
+	font-size: 95%;
+}
+div.NavFrame + div.NavFrame {
+	border-top-style: none;
+	border-top-style: hidden;
+}
+div.NavFrame div.NavHead {
+	line-height: 1.6em;
+	font-weight: bold;
+	background-color: #ccf;
+	position: relative;
+}
+div.NavFrame p,
+div.NavFrame div.NavContent,
+div.NavFrame div.NavContent p {
+	font-size: 100%;
+}
+a.NavToggle {
+	position: absolute;
+	top: 0;
+	/* @noflip */
+	right: 3px;
+	font-weight: normal;
+	font-size: 90%;
+}
+
+/* Hatnotes and disambiguation notices */
+.hatnote {
+	font-style: italic;
+}
+.hatnote i {
+	font-style: normal;
+}
+div.hatnote {
+	/* @noflip */
+	padding-left: 1.6em;
+	margin-bottom: 0.5em;
+}
+div.hatnote + div.hatnote {
+	margin-top: -0.5em;
+}
+
+/* Allow transcluded pages to display in lists rather than a table. */
+.listify td {
+	display: list-item;
+}
+.listify tr {
+	display: block;
+}
+.listify table {
+	display: block;
+}
+
+/* Geographical coordinates defaults. See [[Template:Coord/link]]
+   for how these are used. The classes "geo", "longitude", and
+   "latitude" are used by the [[Geo microformat]]. */
+/* TemplateStyles */
+.geo-default, .geo-dms, .geo-dec {
+	display: inline;
+}
+.geo-nondefault, .geo-multi-punct {
+	display: none;
+}
+.longitude, .latitude {
+	white-space: nowrap;
+}
+
+/* User block messages */
+div.user-block {
+	padding: 5px;
+	margin-bottom: 0.5em;
+	border: 1px solid #a9a9a9;
+	background-color: #ffefd5;
+}
+
+/* Prevent line breaks in silly places:
+   1) Where desired
+   2) Links when we don't want them to
+   3) Bold "links" to the page itself */
+.nowrap,
+.nowraplinks a,
+.nowraplinks .selflink {
+	white-space: nowrap;
+}
+.nowrap pre {
+	white-space: pre;
+}
+/* But allow wrapping where desired: */
+.wrap,
+.wraplinks a {
+	white-space: normal;
+}
+
+/* For template documentation */
+/* TemplateStyles */
+.template-documentation {
+	clear: both;
+	margin: 1em 0 0 0;
+	border: 1px solid #a2a9b1;
+	background-color: #ecfcf4;
+	padding: 1em;
+}
+
+/* Increase the height of the image upload box */
+#wpUploadDescription {
+	height: 13em;
+}
+
+/* Minimum thumb width */
+.thumbinner {
+	min-width: 100px;
+}
+
+/* Prevent floating boxes from overlapping any category listings,
+   file histories, edit previews, and edit [Show changes] views. */
+#mw-subcategories, #mw-pages, #mw-category-media,
+#filehistory, #wikiPreview, #wikiDiff {
+	clear: both;
+}
+
+/* Selectively hide headers in WikiProject banners */
+/* TemplateStyles */
+.wpb .wpb-header {
+	display: none;
+}
+.wpbs-inner .wpb .wpb-header {
+	display: block;            /* for IE */
+}
+.wpbs-inner .wpb .wpb-header {
+	display: table-row;        /* for real browsers */
+}
+.wpbs-inner .wpb-outside {
+	display: none;             /* hide things that should only display outside shells */
+}
+
+/* Styling for Abuse Filter tags */
+.mw-tag-markers {
+	font-style: italic;
+	font-size: 90%;
+}
+
+/* Hide stuff meant for accounts with special permissions. Made visible again in
+   [[MediaWiki:Group-checkuser.css]], [[MediaWiki:Group-sysop.css]], [[MediaWiki:Group-patroller.css]],
+   [[MediaWiki:Group-templateeditor.css]], [[MediaWiki:Group-extendedmover.css]],
+   [[MediaWiki:Group-extendedconfirmed.css]], and [[Mediawiki:Group-autoconfirmed.css]]. */
+.checkuser-show,
+.sysop-show,
+.patroller-show,
+.templateeditor-show,
+.extendedmover-show,
+.extendedconfirmed-show,
+.autoconfirmed-show,
+.user-show {
+	display: none;
+}
+
+/* Hide the redlink generated by {{Editnotice}},
+   this overrides the ".sysop-show { display: none; }" above that applies
+   to the same link as well. See [[phab:T45013]]
+
+   Hide the images in editnotices to keep them readable in VE view.
+   Long term, editnotices should become a core feature so that they can be designed responsive. */
+.ve-ui-mwNoticesPopupTool-item .editnotice-redlink,
+.ve-ui-mwNoticesPopupTool-item .mbox-image,
+.ve-ui-mwNoticesPopupTool-item .mbox-imageright {
+	display: none !important;
+}
+
+/* Remove bullets when there are multiple edit page warnings */
+ul.permissions-errors &gt; li {
+	list-style: none none;
+}
+ul.permissions-errors {
+	margin: 0;
+}
+
+/* Generic class for Times-based serif, texhtml class for inline math */
+.times-serif,
+span.texhtml {
+	font-family: "Nimbus Roman No9 L", "Times New Roman", Times, serif;
+	font-size: 118%;
+	line-height: 1;
+}
+span.texhtml {
+	white-space: nowrap;
+}
+span.texhtml span.texhtml {
+	font-size: 100%;
+}
+span.mwe-math-mathml-inline {
+	font-size: 118%;
+}
+
+/* Force tabular and lining display for digits and texhtml */
+.digits,
+.texhtml {
+	-moz-font-feature-settings: "lnum", "tnum", "kern" 0;
+	-webkit-font-feature-settings: "lnum", "tnum", "kern" 0;
+	font-feature-settings: "lnum", "tnum", "kern" 0;
+	font-variant-numeric: lining-nums tabular-nums;
+	font-kerning: none;
+}
+
+/* Make &lt;math display="block"&gt; be left aligned with one space indent for compatibility with style conventions */
+.mwe-math-fallback-image-display,
+.mwe-math-mathml-display {
+	margin-left: 1.6em !important;
+	margin-top: 0.6em;
+	margin-bottom: 0.6em;
+}
+.mwe-math-mathml-display math {
+	display: inline;
+}
+
+/* Fix styling of transcluded prefindex tables */
+table#mw-prefixindex-list-table,
+table#mw-prefixindex-nav-table {
+	width: 98%;
+}
+
+/* Make it possible to hide checkboxes in &lt;inputbox&gt; */
+.inputbox-hidecheckboxes form .inputbox-element,
+.inputbox-hidecheckboxes .mw-ui-checkbox {
+	display: none !important;
+}
+
+/* Work-around for [[phab:T25965]] / [[phab:T100106]] (Kaltura advertisement) */
+.k-player .k-attribution {
+	visibility: hidden;
+}
+
+/* Move 'play' button of video player to bottom left corner */
+.PopUpMediaTransform a .play-btn-large {
+	margin: 0;
+	top: auto;
+	right: auto;
+	bottom: 0;
+	left: 0;
+}
+
+/* Hide FlaggedRevs notice UI when there are no pending changes */
+.flaggedrevs_draft_synced,
+.flaggedrevs_stable_synced {
+	display: none;
+}
+
+/* Force imgs in galleries to have borders by wrapping them in class=bordered-images */
+.bordered-images img {
+	border: solid #ddd 1px;
+}
+
+/* Gallery styles background changes are restricted to screen view. In printing we should avoid applying backgrounds. */
+@media screen {
+	/* The backgrounds for galleries. */
+	#content .gallerybox div.thumb {
+		/* Light gray padding */
+		background-color: #f8f9fa;
+	}
+	
+	/* Put a chequered background behind images, only visible if they have transparency.
+	'.filehistory a img' and '#file img:hover' are handled by MediaWiki core (as of 1.19) */
+	.gallerybox .thumb img {
+		background: #fff url(//upload.wikimedia.org/wikipedia/commons/5/5d/Checker-16x16.png) repeat;
+	}
+	/* But not on articles, user pages, portals or with opt-out. */
+	.ns-0 .gallerybox .thumb img,
+	.ns-2 .gallerybox .thumb img,
+	.ns-100 .gallerybox .thumb img,
+	.nochecker .gallerybox .thumb img {
+		background-image: none;
+	}
+
+}
+
+/* Display "From Wikipedia, the free encyclopedia" in skins that support it, do not apply to print mode */
+@media screen {
+	#siteSub {
+		display: block;
+	}
+}
+
+/* Workaround pending completion of T241683*/
+#coll-create_a_book {
+	display: none;
+}</text>
+      <sha1>l0xovznknxditod55rf3ng7pckyrvgd</sha1>
+    </revision>
+  </page>
+</mediawiki>
